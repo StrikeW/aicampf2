@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#000000">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="./css/style.css"/>
     <title>MLflow</title>
 </head>
 <body>
@@ -18,7 +18,7 @@
     <h1>Jinjia2 Template Demo</h1>
 </div>
 <div class="container">
-    <form action="" enctype='multipart/form-data'  method="post">
+    <form action="" enctype='multipart/form-data'  method="post" id="form1">
         <p>Choose model method:</p>
         <select name="model">
             {% for m in my_models %}
@@ -32,7 +32,8 @@
         <br/>
         <input type="file" name="datafile"><br/>
         <input type="button" id = "button" onclick=train() value = "Train!">
-    </form>
+    </form><br/>
+    <span id="train_status">训练状态：未开始</span>
 </div>
 <!--
   This HTML file is a template.
@@ -50,10 +51,20 @@
 <script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
 <!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript" >
+    var submitted = 1;
     function train() {
-        $.post('/api/train', {}, function(result) {
-
+        $.post('/api/train', {}, function(result,status) {
+            alert(result);
+            alert(status);
+            $('#train_status').html('训练状态：'+ result);
+            submitted = 0;
         });
+    }
+    function query() {
+        if (submitted === 0)
+            $.post('/api/train', {}, function(result,status) {
+                $('#train_status').html('训练状态：'+ result);
+            });
     }
 </script>
 
