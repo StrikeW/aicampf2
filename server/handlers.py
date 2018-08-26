@@ -3,7 +3,10 @@ import json
 import os
 import re
 import six
+import sys
 
+sys.path.append("..")
+from model.dnn import train
 from flask import Response, request, send_file
 from google.protobuf.json_format import MessageToJson, ParseDict
 from querystring_parser import parser
@@ -71,9 +74,13 @@ def _hello():
     resp.set_data(u'{"hello": "world"}');
     return resp
 
-def _train():
+def _train(req=request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
+    if req.method == "POST":
+        train()
+    # train
+
     return resp
 
 def get_endpoints():
