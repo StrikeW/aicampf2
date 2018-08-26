@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, send_from_directory, make_response
+from flask import Flask, send_from_directory, make_response, render_template
 
 from server import handlers
 from utils.process import exec_cmd
@@ -9,11 +9,10 @@ FILE_STORE_ENV_VAR = "MLFLOW_SERVER_FILE_STORE"
 ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"
 STATIC_PREFIX_ENV_VAR = "MLFLOW_STATIC_PREFIX"
 
-# REL_STATIC_DIR = "js/build"
+REL_STATIC_DIR = "templates"
 app = Flask(__name__)
-# STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
 # app.root_path is 'server/'
-STATIC_DIR = app.root_path
+STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
 
 for http_path, handler, methods in handlers.get_endpoints():
     app.add_url_rule(http_path, handler.__name__, handler, methods=methods)
@@ -39,8 +38,23 @@ def serve_static_file(path):
     return send_from_directory(STATIC_DIR, path)
 
 
+def load_model():
+    print('Root path %s' % app.root_path)
+    a = []
+    fpath = os.path.join(STATIC_DIR, 'model_list.txt')
+    with open(fpath) as f:
+        for line in f:
+            print(line)
+            a.append(line)
+    return a
+
 # Serve the index.html for the React App for all other routes.
-@app.route(_add_static_prefix('/'))
+@app.route('/models')
+def show_models():
+    models = load_model()
+    return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
+
+@app.route('/')
 def serve():
     return send_from_directory(STATIC_DIR, 'index.html')
 
