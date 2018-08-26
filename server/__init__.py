@@ -42,13 +42,24 @@ def load_model():
     with open(fpath) as f:
         for line in f:
             print(line)
+            line = line.strip()
             a.append(line)
     return a
+
+#def load_config(conf_path):
+#    fpath = os.path.join(STATIC_DIR, conf_path)
+#    with open(fpath) as f:
+#        a = f.read()
+#        return a
 
 # Serve the index.html for the React App for all other routes.
 @app.route('/models')
 def show_models():
     models = load_model()
+#    model_config = []
+#    for n in models:
+#        model_config.append(load_config(n))
+
     return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
 
 @app.route('/')
