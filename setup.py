@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'flask',
+    'six',
     'requests>=2.17.3',
     'uuid',
     'gunicorn',
