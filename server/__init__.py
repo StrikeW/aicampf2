@@ -10,7 +10,7 @@ ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"
 STATIC_PREFIX_ENV_VAR = "MLFLOW_STATIC_PREFIX"
 
 # REL_STATIC_DIR = "js/build"
-app = Flask(__name__, static_folder=REL_STATIC_DIR)
+app = Flask(__name__)
 # STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
 # app.root_path is 'server/'
 STATIC_DIR = app.root_path
