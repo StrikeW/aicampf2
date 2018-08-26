@@ -62,6 +62,10 @@ def show_models():
 
     return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
 
+@app.route('/test')
+def show_test():
+    return render_template('test.html')
+
 @app.route('/')
 def serve():
     return send_from_directory(STATIC_DIR, 'index.html')

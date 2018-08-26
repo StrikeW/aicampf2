@@ -31,9 +31,12 @@
         <br/>
         <br/>
         <input type="file" name="datafile"><br/>
-        <input type="button" id = "button" onclick=train() value = "Train!">
+        <input type="button" id = "train_btn" onclick=train() value = "Train!">
     </form><br/>
     <span id="train_status">训练状态：未开始</span>
+    <br/>
+    <br/>
+    <input type="button" id = "deploy_btn" onclick=deploy() value = "Deploy!">
 </div>
 <!--
   This HTML file is a template.
@@ -65,6 +68,12 @@
             $.post('/api/train', {}, function(result,status) {
                 $('#train_status').html('训练状态：'+ result);
             });
+    }
+    function deploy() {
+        $.post('/api/deploy', {}, function(status) {
+            alert(status)
+
+        })
     }
 </script>
 

@@ -83,20 +83,27 @@ def _train(req=request):
 
     return resp
 
+def _deploy():
+    resp = Response(mimetype='text/plain')
+    resp.set_data(u'Depoly successful!');
+    return resp
+
 def get_endpoints():
     """
     :return: List of tuples (path, handler, methods)
     """
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
-            ('/api/train', HANDLERS['train'], ['POST'])]
+            ('/api/train', HANDLERS['train'], ['POST']),
+            ('/api/deploy', HANDLERS['deploy'], ['POST'])]
     return ret
 
 
 # dict of handlers
 HANDLERS = {
         "hello": _hello,
-        'train': _train
+        'train': _train,
+        'deploy': _deploy
     # CreateExperiment: _create_experiment,
     # GetExperiment: _get_experiment,
     # CreateRun: _create_run,
