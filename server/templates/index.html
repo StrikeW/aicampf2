@@ -12,14 +12,15 @@
 </body>
 </html>
 
-<script type="text/javascript" src='templates/jquery-3.3.1.min.js'></script>
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script>
+<script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+<script type="text/javascript" >
     function train() {
         alert('ck');
-        $.post('/train', {sb: '1'}, function() {
-            alert('sb');
+        $.post('/api/train', {sb: '1'}, function() {
+            alert('SB');
         });
         alert('ck2');
     }
 </script>
+

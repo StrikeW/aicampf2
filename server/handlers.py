@@ -71,19 +71,25 @@ def _hello():
     resp.set_data(u'{"hello": "world"}');
     return resp
 
+def _train():
+    resp = Response(mimetype='text/plain')
+    resp.set_data(u'Task submit successful!');
+    return resp
 
 def get_endpoints():
     """
     :return: List of tuples (path, handler, methods)
     """
     # a fake handler
-    ret = [('/api/hello', HANDLERS['hello'], ['GET'])]
+    ret = [('/api/hello', HANDLERS['hello'], ['GET']),
+            ('/api/train', HANDLERS['train'], ['POST'])]
     return ret
 
 
 # dict of handlers
 HANDLERS = {
         "hello": _hello,
+        'train': _train
     # CreateExperiment: _create_experiment,
     # GetExperiment: _get_experiment,
     # CreateRun: _create_run,

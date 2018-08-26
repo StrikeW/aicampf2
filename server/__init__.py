@@ -17,13 +17,11 @@ STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
 for http_path, handler, methods in handlers.get_endpoints():
     app.add_url_rule(http_path, handler.__name__, handler, methods=methods)
 
-
 def _add_static_prefix(route):
     prefix = os.environ.get(STATIC_PREFIX_ENV_VAR)
     if prefix:
         return prefix + route
     return route
-
 
 # Serve the font awesome fonts for the React app
 @app.route(_add_static_prefix('/webfonts/<path:path>'))
@@ -36,7 +34,6 @@ def serve_webfonts(path):
 @app.route(_add_static_prefix('/static-files/<path:path>'))
 def serve_static_file(path):
     return send_from_directory(STATIC_DIR, path)
-
 
 def load_model():
     print('Root path %s' % app.root_path)
