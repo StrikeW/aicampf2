@@ -33,9 +33,9 @@ def train():
     for i in range(1000):
         batch = mnist.train.next_batch(50)
         train_step.run(feed_dict={x: batch[0], y_: batch[1]})
-
     saver.save(sess, "model/dnn/model")
-# 测试
-#correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-#accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-#print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_:mnist.test.labels}))
+
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y_:mnist.test.labels})
+    return "Our models acc is: " + str(acc)

@@ -15,7 +15,7 @@
     You need to enable JavaScript to run this app.
 </noscript>
 <div class="title">
-    <h1>Jinjia2 Template Demo</h1>
+    <h1>Team F2 AI Demo</h1>
 </div>
 <div class="container">
     <form action="" enctype='multipart/form-data'  method="post" id="form1">
@@ -54,8 +54,8 @@
     var submitted = 1;
     function train() {
         $.post('/api/train', {}, function(result,status) {
-            alert(result);
-            alert(status);
+            //alert(result);
+            //alert(status);
             $('#train_status').html('训练状态：'+ result);
             submitted = 0;
         });

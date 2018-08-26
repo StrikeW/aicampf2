@@ -6,7 +6,7 @@ import six
 import sys
 
 sys.path.append("..")
-from model.dnn import train
+from  model import dnn
 from flask import Response, request, send_file
 from google.protobuf.json_format import MessageToJson, ParseDict
 from querystring_parser import parser
@@ -78,7 +78,7 @@ def _train(req=request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
     if req.method == "POST":
-        train()
+        return dnn.train()
     # train
 
     return resp
