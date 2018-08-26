@@ -9,9 +9,11 @@ FILE_STORE_ENV_VAR = "MLFLOW_SERVER_FILE_STORE"
 ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"
 STATIC_PREFIX_ENV_VAR = "MLFLOW_STATIC_PREFIX"
 
-REL_STATIC_DIR = "js/build"
+# REL_STATIC_DIR = "js/build"
 app = Flask(__name__, static_folder=REL_STATIC_DIR)
-STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
+# STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
+# app.root_path is 'server/'
+STATIC_DIR = app.root_path
 
 for http_path, handler, methods in handlers.get_endpoints():
     app.add_url_rule(http_path, handler.__name__, handler, methods=methods)
@@ -43,7 +45,8 @@ def serve():
     return send_from_directory(STATIC_DIR, 'index.html')
 
 
-def _run_server(file_store_path, default_artifact_root, host, port, workers, static_prefix):
+# def _run_server(file_store_path, default_artifact_root, host, port, workers, static_prefix):
+def _run_server(host, port, workers, static_prefix):
     """
     Run the MLflow server, wrapping it in gunicorn
     :param static_prefix: If set, the index.html asset will be served from the path static_prefix.
@@ -51,12 +54,12 @@ def _run_server(file_store_path, default_artifact_root, host, port, workers, sta
     :return: None
     """
     env_map = {}
-    if file_store_path:
-        env_map[FILE_STORE_ENV_VAR] = file_store_path
-    if default_artifact_root:
-        env_map[ARTIFACT_ROOT_ENV_VAR] = default_artifact_root
+    # if file_store_path:
+        # env_map[FILE_STORE_ENV_VAR] = file_store_path
+    # if default_artifact_root:
+        # env_map[ARTIFACT_ROOT_ENV_VAR] = default_artifact_root
     if static_prefix:
         env_map[STATIC_PREFIX_ENV_VAR] = static_prefix
     bind_address = "%s:%s" % (host, port)
-    exec_cmd(["gunicorn", "-b", bind_address, "-w", "%s" % workers, "mlflow.server:app"],
+    exec_cmd(["gunicorn", "-b", bind_address, "-w", "%s" % workers, "server:app"],
              env=env_map, stream_output=True)
