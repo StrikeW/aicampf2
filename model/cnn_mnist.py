@@ -17,10 +17,12 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 import numpy as np
 import sys
-import datasets
+from . import datasets
+#import datasets
 import tensorflow as tf
 import pandas as pd
 from tensorflow.contrib import predictor
+import json
 
 # mnist = input_data.read_data_sets("/tmp/data/", one_hot=False)
 
@@ -45,6 +47,13 @@ num_input = 784 # MNIST data input (img shape: 28*28)
 num_classes = 10 # MNIST total classes (0-9 digits)
 dropout = 0.25 # Dropout, probability to drop a unit
 
+#set parameter
+def set_parameter(conf):
+    dic = json.loads(conf)[0]
+    global learning_rate, num_steps, batch_size
+    learning_rate = dic['learning_rate'];
+    num_steps = dic['num_steps']
+    batch_size = dic['batch_size']
 
 # Create the neural network
 def conv_net(x_dict, n_classes, dropout, reuse, is_training):
@@ -134,6 +143,7 @@ def evaluate(model):
 
     print("Evaluate Accuracy:", e['accuracy'])
 
+    return e['accuracy'], e['loss']
 
 # 使用predictor.from_saved_model()加载导出的模型，用来预测！
 def predict(export_dir):
@@ -151,8 +161,9 @@ def predict(export_dir):
 
     accuracy = count/total
     print("Predict Accuracy:", accuracy)
+    return "Predict Accuracy:" + str(accuracy)
 
-def main():
+def train():
     print('Train mode')
     # tf.logging.set_verbosity(tf.logging.INFO)
     # Build the Estimator
@@ -165,7 +176,7 @@ def main():
 
     # Train the Model
     model.train(input_fn, steps=num_steps)
-    evaluate(model)
+    acc, loss = evaluate(model)
 
     feat_spec = {"images": tf.placeholder("float", name="images", shape=[None, x_train.shape[1]])}
     # print(feat_spec)
@@ -175,13 +186,20 @@ def main():
     saved_estimator_path = model.export_savedmodel('saved_model', receiver_fn).decode("utf-8")
     print('model is saved to [%s]' % saved_estimator_path)
 
+    model_info = {}
+    model_info['acc'] = str(acc)
+    model_info['save_path'] = saved_estimator_path
+    model_info['loss'] = str(loss)
+    return model_info
+
 if __name__ == "__main__":
+    train()
     if len(sys.argv) <= 1:
         print('lack of arguments!')
         exit(-1)
 
     if sys.argv[1] == 'train':
-        main()
+        train()
     elif sys.argv[1] == 'predict':
         predict(sys.argv[2])
 

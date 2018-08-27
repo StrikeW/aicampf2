@@ -12,23 +12,33 @@
 </div>
 <div class="container">
     <img id="preview" src=""/><br/>
-    <form action="" enctype='multipart/form-data' method="post" id="form1">
-        <input type="file" id="selectImg" name="testfile"   >
+    <form action="" enctype='multipart/form-data' method="post" id="form1" target="nm_iframe">
+        <input type="file" id="selectImg" name="testfile" >
         <br/>
         <br/>
         <input type="button" id="test_btn" onclick=test() value="Test!"/>
+        <input type="button" id="reset_btn" onclick=reset() value="Reset"/>
     </form>
+
+    <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
     <br/>
     <br/>
-    <span id="train_status">预测结果：未上传图像</span>
+    <span id="test_status">预测结果：未预测</span>
 </div>
 </body>
 </html>
 
+<script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript">
+    function reset() {
+        alert('sb');
+       // window.location.reload();
+    }
     function test() {
-        $.post('/api/train', {}, function (result, status) {
-            alert(result);
+        $.post('/api/test', {}, function (result, status) {
+            //alert(result);
+            $('#test_status').html('预测结果：'+ result);
         });
     }
 

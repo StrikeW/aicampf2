@@ -1,14 +1,13 @@
 # Define all the service endpoint handlers here.
 import json
-import os
 import re
 import six
 import sys
 
 sys.path.append("..")
-from  model import dnn
-from flask import Response, request, send_file
-from google.protobuf.json_format import MessageToJson, ParseDict
+from model import cnn_mnist
+from flask import Response, request
+from google.protobuf.json_format import ParseDict
 from querystring_parser import parser
 
 def _get_request_message(request_message, flask_request=request):
@@ -74,18 +73,46 @@ def _hello():
     resp.set_data(u'{"hello": "world"}');
     return resp
 
+def train_model(name, conf):
+    if name == "CNN":
+        cnn_mnist.set_parameter(conf)
+        info = cnn_mnist.train()
+        dic = json.loads(conf)[0]
+        ans = {}
+        ans['Conf'] = dic
+        ans['Result'] = info
+        return json.dumps(ans)
+
 def _train(req=request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
+
     if req.method == "POST":
-        return dnn.train()
+        #data = req.form['file']
+        conf = req.form['conf']
+        name = req.form['model']
+        return train_model(name, conf)
     # train
 
     return resp
 
-def _deploy():
+def _deploy(req = request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Depoly successful!');
+    if req.method == "POST":
+        path = req.form['model']
+        return cnn_mnist.predict(path)
+    return resp
+
+def _test(req = request):
+    resp = Response(mimetype='text/plain')
+    resp.set_data(u'Depoly successful!');
+    if req.method == "POST":
+        #image = req.files['testfile']
+        pass
+        #print(image)
+        #return cnn_mnist.predict(path)
+        return str(1)
     return resp
 
 def get_endpoints():
@@ -95,7 +122,8 @@ def get_endpoints():
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['POST'])]
+            ('/api/deploy', HANDLERS['deploy'], ['POST']),
+            ('/api/test', HANDLERS['test'], ['POST'])]
     return ret
 
 
@@ -103,7 +131,8 @@ def get_endpoints():
 HANDLERS = {
         "hello": _hello,
         'train': _train,
-        'deploy': _deploy
+        'deploy': _deploy,
+        'test': _test
     # CreateExperiment: _create_experiment,
     # GetExperiment: _get_experiment,
     # CreateRun: _create_run,

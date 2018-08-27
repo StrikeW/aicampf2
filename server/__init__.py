@@ -62,7 +62,7 @@ def show_models():
 
     return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
 
-@app.route('/test')
+@app.route('/test', methods=["POST", "GET"])
 def show_test():
     return render_template('test.html')
 
