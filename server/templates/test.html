@@ -2,19 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <div class="title">
+</head>
+<body>
+<noscript>
+    You need to enable JavaScript to run this app.
+</noscript>
+<div class="title">
     <h1>Welcome to use our AI Demo</h1>
 </div>
 <div class="container">
-    <form action="" enctype='multipart/form-data'  method="post" id="form1">
-        <input type="file" name="testfile">
+    <img id="preview" src=""/><br/>
+    <form action="" enctype='multipart/form-data' method="post" id="form1">
+        <input type="file" id="selectImg" name="testfile"   >
         <br/>
         <br/>
-        <input type="button" id = "test_btn" onclick=test() value = "Test!">
+        <input type="button" id="test_btn" onclick=test() value="Test!"/>
     </form>
     <br/>
     <br/>
     <span id="train_status">预测结果：未上传图像</span>
 </div>
-</head>
+</body>
 </html>
+
+<script type="text/javascript">
+    function test() {
+        $.post('/api/train', {}, function (result, status) {
+            alert(result);
+        });
+    }
+
+    // function readImg() {
+    //     var imgFile = document.getElementById('imgsrc').files[0];
+    //     var fileReader = new FileReader();
+    //     fileReader.onload
+    //     {
+    //         document.getElementById('image1').src = fileReader.result;
+    //     }
+    //     fileReader.readAsDataURL(imgFile);
+    // }
+    document.getElementById('selectImg').addEventListener('change',()=>{
+        const file = document.getElementById('selectImg');
+        const fileObj = file.files[0];
+        const windowURL = window.URL || window.webkitURL;
+        const img = document.getElementById('preview');
+
+        if(file && fileObj) {
+            const dataURl = windowURL.createObjectURL(fileObj);
+            img.setAttribute('src',dataURl);
+        }
+    },false)
+</script>
