@@ -56,7 +56,9 @@ def _train_model(name, conf):
             sess.add(m)
             sess.commit()
             sess.close()
-            print('Insert a trained model')
+            print('Insert a trained model. id=%d' % m.mid)
+
+        train_ret['mid'] = m.mid
 
         ans = {}
         ans['Conf'] = dic
@@ -77,12 +79,8 @@ def _train(req=request):
     return resp
 
 def _deploy(req = request):
-    if req.method == "POST":
-        # path = req.form['model']
-        #mid = req.form['mid']
-        pass
+    mid = req.form['mid']
 
-    # TODO
     ret = deployer.deploy_model(mid = 5)
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
@@ -109,7 +107,7 @@ def get_endpoints():
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
+            ('/api/deploy', HANDLERS['deploy'], ['POST']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
             ]
     return ret

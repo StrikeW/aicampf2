@@ -63,8 +63,8 @@
         $("#form1").ajaxForm(function(result){
             var dic = JSON.parse(result)
             $('#train_status').html('训练状态：'+ result);
-            model_id = dic.Result.save_path
-            //alert(model_id)
+            model_id = dic.Result.mid
+            alert(model_id)
             submitted = 0;
         });
     });
@@ -77,7 +77,7 @@
     }
     function deploy() {
         //alert(model_id)
-        $.post('/api/deploy', {model:model_id}, function(result, status) {
+        $.post('/api/deploy', {mid:model_id}, function(result, status) {
             alert(result);
         })
     }
