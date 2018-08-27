@@ -1,10 +1,10 @@
-# Define all the service endpoint handlers here.
 import json
 import time
 import cv2
 import os
 import numpy as np
 from server.model import cnn_mnist
+from server.model import cnn_cifar
 from flask import Response, request
 from server.image_cli import ImageCli
 from server import config
@@ -27,22 +27,16 @@ class MyEncoder(json.JSONEncoder):
             return super(MyEncoder, self).default(obj)
 
 
-def _not_implemented():
-    response = Response()
-    response.status_code = 404
-    return response
-
 def _hello():
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"hello": "world"}');
     return resp
 
-def _train_model(name, conf):
+def _train_model(name, conf, data):
     if name == "CNN":
         dic = json.loads(conf)
         cnn_mnist.set_parameter(dic)
-        train_ret = cnn_mnist.train()
-
+        train_ret = cnn_cifar.train(data)
         m = Model()
         m.saved_path = train_ret['save_path']
         m.type = 1
@@ -66,10 +60,10 @@ def _train_model(name, conf):
 def _train(req=request):
     if req.method == "POST":
         print(len(req.files))
-        # data = req.files['datafile']
+        data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        return _train_model(name, conf)
+        return _train_model(name, conf, data)
 
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
@@ -87,7 +81,6 @@ def _deploy(req = request):
 
 
 serv_clis = []
-
 
 def _img_ping():
     global serv_clis

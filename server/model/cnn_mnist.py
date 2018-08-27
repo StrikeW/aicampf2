@@ -161,7 +161,6 @@ def predict(export_dir, file_path):
 
 def train():
     (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
-
     x_train = x_train.astype(np.float32).reshape(x_train.shape[0], 784)
     y_train = y_train.astype(np.float32)
 
