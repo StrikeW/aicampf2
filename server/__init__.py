@@ -52,14 +52,12 @@ def load_model():
 #        return a
 
 # Serve the index.html for the React App for all other routes.
-@app.route('/models')
-def show_models():
-    models = load_model()
-#    model_config = []
-#    for n in models:
-#        model_config.append(load_config(n))
-
-    return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
+@app.route('/model_cnn')
+def show_model_cnn():
+    return render_template('model_cnn.html')
+@app.route('/test_cnn')
+def show_test_cnn():
+    return render_template('test_cnn.html')
 
 @app.route('/test', methods=["POST", "GET"])
 def show_test():
