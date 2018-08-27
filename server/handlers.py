@@ -104,15 +104,16 @@ def _deploy(req = request):
         return cnn_mnist.predict(path)
     return resp
 
-def _test(req = request):
+def _predict(req = request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Depoly successful!');
-    if req.method == "POST":
+    #if req.method == "POST":
+    print(req.files)
+    print(req.form)
         #image = req.files['testfile']
-        pass
         #print(image)
         #return cnn_mnist.predict(path)
-        return str(1)
+    return str(1)
     return resp
 
 def get_endpoints():
@@ -123,7 +124,7 @@ def get_endpoints():
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
             ('/api/deploy', HANDLERS['deploy'], ['POST']),
-            ('/api/test', HANDLERS['test'], ['POST'])]
+            ('/api/predict', HANDLERS['predict'], ['POST', 'GET'])]
     return ret
 
 
@@ -132,7 +133,7 @@ HANDLERS = {
         "hello": _hello,
         'train': _train,
         'deploy': _deploy,
-        'test': _test
+        'predict': _predict
     # CreateExperiment: _create_experiment,
     # GetExperiment: _get_experiment,
     # CreateRun: _create_run,
