@@ -4,6 +4,7 @@ import re
 import six
 import sys
 
+import numpy as np
 from server.model import cnn_mnist
 from flask import Response, request
 from google.protobuf.json_format import ParseDict
@@ -88,7 +89,7 @@ def _train(req=request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
     if req.method == "POST":
-        #data = req.form['file']
+        data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
         return train_model(name, conf)
@@ -99,7 +100,8 @@ def _train(req=request):
 def _deploy(req = request):
     if req.method == "POST":
         # path = req.form['model']
-        mid = req.form['mid']
+        #mid = req.form['mid']
+        pass
 
     # TODO
     ret = deployer.deploy_model(mid = 5)
@@ -108,6 +110,8 @@ def _deploy(req = request):
     return resp
 
 def _img_predict(req=request):
+    f = req.files['testfile'].read()
+    img = list(f)
     # TODO
     imgcli = ImageCli()
     imgcli.connect()
@@ -125,9 +129,9 @@ def get_endpoints():
     """
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
-            ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['GET']),
-            ('/api/imgpredict', HANDLERS['imgpredict'], ['GET']),
+            ('/api/train', HANDLERS['train'], ['POST', 'GET']),
+            ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
+            ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
             ]
     return ret
 
@@ -137,5 +141,5 @@ HANDLERS = {
         "hello": _hello,
         'train': _train,
         'deploy': _deploy,
-        'imgpredict': _img_predict,
+        'img_predict': _img_predict,
 }
