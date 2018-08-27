@@ -6,9 +6,6 @@ import tempfile
 
 import yaml
 
-from mlflow.entities.file_info import FileInfo
-
-
 def is_directory(name):
     return os.path.isdir(name)
 
@@ -200,21 +197,6 @@ def read_file(parent_path, file_name):
     file_path = os.path.join(parent_path, file_name)
     with open(file_path, 'r') as f:
         return f.readlines()
-
-
-def get_file_info(path, rel_path):
-    """
-    Returns file meta data : location, size, ... etc
-
-    :param path: Path to artifact
-
-    :return: `FileInfo` object
-    """
-    if is_directory(path):
-        return FileInfo(rel_path, True, None)
-    else:
-        return FileInfo(rel_path, False, os.path.getsize(path))
-
 
 def get_relative_path(root_path, target_path):
     """
