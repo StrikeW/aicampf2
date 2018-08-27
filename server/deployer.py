@@ -1,4 +1,5 @@
 import os
+import time
 from server import config
 from server.dal.entities import Model
 from server.utils.process import exec_cmd
@@ -9,9 +10,15 @@ def deploy_model(mid):
     # TODO
     # model = Model.get_by_id(mid)
 
-    pid = os.fork()
+    try:
+        pid = os.fork()
+    except Exception as e:
+        raise e
+
     if pid == 0:    # child
-        exec_cmd(cmd=['./server/image_service.py', '127.0.0.1', '9090'],
-                 stream_output=True)
+        print('I am child')
+        exec_cmd(cmd=['./server/image_service.py', mid], stream_output=True)
+
+    time.sleep(2)
     print('deploy ok')
     return True

@@ -44,17 +44,7 @@ if __name__ == "__main__":
         if cmd == 'ping':
             resp = imgCli.client.ping()
             print('server resp: %s' % resp)
-        elif cmd == 'predict':
-            predicts = imgCli.client.predict([1, 1, 0])
-            print('server resp: ', predicts)
-        elif cmd == 'sum':
-            ret = imgCli.client.sum([5,10,2])
-            print('server resp: sum=%d' % ret)
         elif cmd == 'quit':
             going = False
     imgCli.close()
-
-
-
-
 

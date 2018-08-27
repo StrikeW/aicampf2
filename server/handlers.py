@@ -1,15 +1,13 @@
 # Define all the service endpoint handlers here.
 import json
-import re
-import six
-import sys
-
+import time
+import cv2
+import os
 import numpy as np
 from server.model import cnn_mnist
 from flask import Response, request
-from google.protobuf.json_format import ParseDict
-from querystring_parser import parser
 from server.image_cli import ImageCli
+from server import config
 
 import server.deployer as deployer
 
@@ -55,7 +53,6 @@ def _train_model(name, conf):
         with DBSession() as sess:
             sess.add(m)
             sess.commit()
-            sess.close()
             print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
@@ -79,25 +76,54 @@ def _train(req=request):
     return resp
 
 def _deploy(req = request):
-    mid = req.form['mid']
+    if req.method == "POST":
+        mid = req.form['mid']
+        ret = deployer.deploy_model(mid)
 
-    ret = deployer.deploy_model(mid = 5)
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
     return resp
 
-def _img_predict(req=request):
-    f = req.files['testfile'].read()
-    img = list(f)
-    # TODO
-    imgcli = ImageCli()
-    imgcli.connect()
+
+
+serv_clis = []
+
+
+def _img_ping():
+    global serv_clis
+    if len(serv_clis) == 0:
+        imgcli = ImageCli()
+        imgcli.connect()
+        serv_clis.append(imgcli)
+    else:
+        imgcli = serv_clis[0]
 
     ret = imgcli.client.ping()
-    print('_img_predict: ret=%s' % ret)
+    resp = Response(mimetype='application/json')
+    resp.set_data(u'{"state": "%s"}' % ret);
+    return resp
+
+
+def _img_predict(req=request):
+    f = req.files['testfile']
+    file_path = os.path.join(config.upload_path, f.filename)
+    f.save(os.path.join(config.upload_path, f.filename))
+
+    print('img_predict: file saved: %s' % file_path)
+
+    global serv_clis
+    if len(serv_clis) == 0:
+        imgcli = ImageCli()
+        imgcli.connect()
+        serv_clis.append(imgcli)
+    else:
+        imgcli = serv_clis[0]
+
+    ret = imgcli.client.predict(file_path)
+    print('_img_predict: prediction=%s' % ret)
 
     resp = Response(mimetype='application/json')
-    resp.set_data(u'{"code": 0, "msg": "%s"}' % ret);
+    resp.set_data(u'{"code": 0, "result": "%s"}' % ret[0]);
     return resp
 
 def get_endpoints():
@@ -107,7 +133,7 @@ def get_endpoints():
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['POST']),
+            ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
             ]
     return ret

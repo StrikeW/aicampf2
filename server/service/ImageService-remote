@@ -25,7 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  string ping()')
-    print('   predict( datas)')
+    print('   predict(string path)')
     print('')
     sys.exit(0)
 
@@ -115,7 +115,7 @@ elif cmd == 'predict':
     if len(args) != 1:
         print('predict requires 1 args')
         sys.exit(1)
-    pp.pprint(client.predict(eval(args[0]),))
+    pp.pprint(client.predict(args[0],))
 
 else:
     print('Unrecognized method %s' % cmd)

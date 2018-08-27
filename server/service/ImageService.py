@@ -32,10 +32,10 @@ class Iface(object):
         """
         pass
 
-    def predict(self, datas):
+    def predict(self, path):
         """
         Parameters:
-         - datas
+         - path
         """
         pass
 
@@ -83,18 +83,18 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "ping failed: unknown result")
 
-    def predict(self, datas):
+    def predict(self, path):
         """
         Parameters:
-         - datas
+         - path
         """
-        self.send_predict(datas)
+        self.send_predict(path)
         return self.recv_predict()
 
-    def send_predict(self, datas):
+    def send_predict(self, path):
         self._oprot.writeMessageBegin('predict', TMessageType.CALL, self._seqid)
         args = predict_args()
-        args.datas = datas
+        args.path = path
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -166,7 +166,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = predict_result()
         try:
-            result.success = self._handler.predict(args.datas)
+            result.success = self._handler.predict(args.path)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -292,12 +292,12 @@ ping_result.thrift_spec = (
 class predict_args(object):
     """
     Attributes:
-     - datas
+     - path
     """
 
 
-    def __init__(self, datas=None,):
-        self.datas = datas
+    def __init__(self, path=None,):
+        self.path = path
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -309,13 +309,8 @@ class predict_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.LIST:
-                    self.datas = []
-                    (_etype3, _size0) = iprot.readListBegin()
-                    for _i4 in range(_size0):
-                        _elem5 = iprot.readI32()
-                        self.datas.append(_elem5)
-                    iprot.readListEnd()
+                if ftype == TType.STRING:
+                    self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -328,12 +323,9 @@ class predict_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('predict_args')
-        if self.datas is not None:
-            oprot.writeFieldBegin('datas', TType.LIST, 1)
-            oprot.writeListBegin(TType.I32, len(self.datas))
-            for iter6 in self.datas:
-                oprot.writeI32(iter6)
-            oprot.writeListEnd()
+        if self.path is not None:
+            oprot.writeFieldBegin('path', TType.STRING, 1)
+            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -354,7 +346,7 @@ class predict_args(object):
 all_structs.append(predict_args)
 predict_args.thrift_spec = (
     None,  # 0
-    (1, TType.LIST, 'datas', (TType.I32, None, False), None, ),  # 1
+    (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
 )
 
 
@@ -380,10 +372,10 @@ class predict_result(object):
             if fid == 0:
                 if ftype == TType.LIST:
                     self.success = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = iprot.readI32()
-                        self.success.append(_elem12)
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readI32()
+                        self.success.append(_elem5)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -400,8 +392,8 @@ class predict_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.LIST, 0)
             oprot.writeListBegin(TType.I32, len(self.success))
-            for iter13 in self.success:
-                oprot.writeI32(iter13)
+            for iter6 in self.success:
+                oprot.writeI32(iter6)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()

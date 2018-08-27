@@ -112,7 +112,7 @@ service ImageService {
 
    string ping(),
 
-   list<i32> predict(1:list<i32> datas),
+   list<i32> predict(1:string path),
 
 }
 

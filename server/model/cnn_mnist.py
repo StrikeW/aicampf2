@@ -15,7 +15,9 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 import sys
 import os
+import cv2
 from server.model import datasets
+
 import tensorflow as tf
 import pandas as pd
 from tensorflow.contrib import predictor
@@ -131,14 +133,22 @@ def evaluate(model, x_test, y_test):
 
     return e['accuracy'], e['loss']
 
-# 使用predictor.from_saved_model()加载导出的模型，用来预测！
-def predict(export_dir, x_test):
+def predict(export_dir, file_path):
+    img = cv2.imread(file_path)
+    img = cv2.resize(img, (28,28), cv2.INTER_LINEAR)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    global num_input
+    img = img.reshape(num_input)
+
+    x_test = np.ndarray((1, num_input), dtype=np.float32)
+    x_test[0] = img
+
     print('Predict mode')
     predict_fn = predictor.from_saved_model(export_dir)
     predictions = predict_fn( {"images": x_test} )
-    df = pd.DataFrame(predictions)
+    # df = pd.DataFrame(predictions)
     # df['original_labels'] = y_test
-    print(df.head())
+    print(predictions)
     # total = len(predictions['output'])
     # count = 0
     # for i in range(total):
@@ -147,7 +157,7 @@ def predict(export_dir, x_test):
 
     # accuracy = count/total
     # print("Predict Accuracy:", accuracy)
-    return "Predict Accuracy:" + str(accuracy)
+    return predictions
 
 def train():
     (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
@@ -195,6 +205,7 @@ if __name__ == "__main__":
     if sys.argv[1] == 'train':
         train()
     elif sys.argv[1] == 'predict':
-        (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
-        predict(sys.argv[2], x_test)
+        # (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
+        export_dir = sys.argv[2]
+        predict(sys.argv[2], '3.png')
 
