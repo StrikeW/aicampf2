@@ -1,9 +1,8 @@
 import os
 
 from flask import Flask, send_from_directory, make_response, render_template
-
 from server import handlers
-from utils.process import exec_cmd
+from server.utils.process import exec_cmd
 
 FILE_STORE_ENV_VAR = "MLFLOW_SERVER_FILE_STORE"
 ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"

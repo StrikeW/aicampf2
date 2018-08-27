@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from server import _run_server, app
+from server import app
 
 if __name__ == "__main__":
     # host = sys.argv[1]

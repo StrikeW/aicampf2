@@ -4,11 +4,12 @@ import re
 import six
 import sys
 
-sys.path.append("..")
-from model import cnn_mnist
+from server.model import cnn_mnist
 from flask import Response, request
 from google.protobuf.json_format import ParseDict
 from querystring_parser import parser
+from server.image_cli import ImageCli
+import server.deployer as deployer
 
 def _get_request_message(request_message, flask_request=request):
     if flask_request.method == 'GET' and len(flask_request.query_string) > 0:
@@ -86,7 +87,6 @@ def train_model(name, conf):
 def _train(req=request):
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
-
     if req.method == "POST":
         #data = req.form['file']
         conf = req.form['conf']
@@ -97,22 +97,26 @@ def _train(req=request):
     return resp
 
 def _deploy(req = request):
-    resp = Response(mimetype='text/plain')
-    resp.set_data(u'Depoly successful!');
     if req.method == "POST":
-        path = req.form['model']
-        return cnn_mnist.predict(path)
+        # path = req.form['model']
+        mid = req.form['mid']
+
+    # TODO
+    ret = deployer.deploy_model(mid = 5)
+    resp = Response(mimetype='application/json')
+    resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
     return resp
 
-def _test(req = request):
-    resp = Response(mimetype='text/plain')
-    resp.set_data(u'Depoly successful!');
-    if req.method == "POST":
-        #image = req.files['testfile']
-        pass
-        #print(image)
-        #return cnn_mnist.predict(path)
-        return str(1)
+def _img_predict(req=request):
+    # TODO
+    imgcli = ImageCli()
+    imgcli.connect()
+
+    ret = imgcli.client.ping()
+    print('_img_predict: ret=%s' % ret)
+
+    resp = Response(mimetype='application/json')
+    resp.set_data(u'{"code": 0, "msg": "%s"}' % ret);
     return resp
 
 def get_endpoints():
@@ -122,8 +126,9 @@ def get_endpoints():
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['POST']),
-            ('/api/test', HANDLERS['test'], ['POST'])]
+            ('/api/deploy', HANDLERS['deploy'], ['GET']),
+            ('/api/imgpredict', HANDLERS['imgpredict'], ['GET']),
+            ]
     return ret
 
 
@@ -132,19 +137,5 @@ HANDLERS = {
         "hello": _hello,
         'train': _train,
         'deploy': _deploy,
-        'test': _test
-    # CreateExperiment: _create_experiment,
-    # GetExperiment: _get_experiment,
-    # CreateRun: _create_run,
-    # UpdateRun: _update_run,
-    # LogParam: _log_param,
-    # LogMetric: _log_metric,
-    # GetRun: _get_run,
-    # SearchRuns: _search_runs,
-    # ListArtifacts: _list_artifacts,
-    # GetArtifact: _get_artifact,
-    # GetMetricHistory: _get_metric_history,
-    # ListExperiments: _list_experiments,
-    # GetParam: _get_param,
-    # GetMetric: _get_metric,
+        'imgpredict': _img_predict,
 }

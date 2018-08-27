@@ -12,30 +12,14 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 """
 from __future__ import division, print_function, absolute_import
 
-# Import MNIST data
-from tensorflow.examples.tutorials.mnist import input_data
-
 import numpy as np
 import sys
-from . import datasets
-#import datasets
+from server.model import datasets
 import tensorflow as tf
 import pandas as pd
 from tensorflow.contrib import predictor
 import json
 
-# mnist = input_data.read_data_sets("/tmp/data/", one_hot=False)
-
-
-(x_train, y_train), (x_test, y_test) = datasets.load_mnist()
-
-x_train = x_train.astype(np.float32).reshape(x_train.shape[0], 784)
-y_train = y_train.astype(np.float32)
-
-print(y_train.shape)
-x_test = x_test.astype(np.float32).reshape(x_test.shape[0], 784)
-y_test = y_test.astype(np.float32)
-print(y_test.shape)
 
 # Training Parameters
 learning_rate = 0.001
@@ -132,7 +116,7 @@ def model_fn(features, labels, mode):
 
     return estim_specs
 
-def evaluate(model):
+def evaluate(model, x_test, y_test):
     # Evaluate the Model
     # Define the input function for evaluating
     input_fn = tf.estimator.inputs.numpy_input_fn(
@@ -146,24 +130,32 @@ def evaluate(model):
     return e['accuracy'], e['loss']
 
 # 使用predictor.from_saved_model()加载导出的模型，用来预测！
-def predict(export_dir):
+def predict(export_dir, x_test):
     print('Predict mode')
     predict_fn = predictor.from_saved_model(export_dir)
     predictions = predict_fn( {"images": x_test} )
     df = pd.DataFrame(predictions)
-    df['original_labels'] = y_test
+    # df['original_labels'] = y_test
     print(df.head())
-    total = len(predictions['output'])
-    count = 0
-    for i in range(total):
-        if predictions['output'][i] == y_test[i]:
-            count += 1
+    # total = len(predictions['output'])
+    # count = 0
+    # for i in range(total):
+        # if predictions['output'][i] == y_test[i]:
+            # count += 1
 
-    accuracy = count/total
-    print("Predict Accuracy:", accuracy)
+    # accuracy = count/total
+    # print("Predict Accuracy:", accuracy)
     return "Predict Accuracy:" + str(accuracy)
 
 def train():
+    (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
+
+    x_train = x_train.astype(np.float32).reshape(x_train.shape[0], 784)
+    y_train = y_train.astype(np.float32)
+
+    x_test = x_test.astype(np.float32).reshape(x_test.shape[0], 784)
+    y_test = y_test.astype(np.float32)
+
     print('Train mode')
     # tf.logging.set_verbosity(tf.logging.INFO)
     # Build the Estimator
@@ -176,7 +168,7 @@ def train():
 
     # Train the Model
     model.train(input_fn, steps=num_steps)
-    acc, loss = evaluate(model)
+    acc, loss = evaluate(model, x_test, y_test)
 
     feat_spec = {"images": tf.placeholder("float", name="images", shape=[None, x_train.shape[1]])}
     # print(feat_spec)
@@ -201,5 +193,6 @@ if __name__ == "__main__":
     if sys.argv[1] == 'train':
         train()
     elif sys.argv[1] == 'predict':
-        predict(sys.argv[2])
+        (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
+        predict(sys.argv[2], x_test)
 
