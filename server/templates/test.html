@@ -12,12 +12,11 @@
 </div>
 <div class="container">
     <img id="preview" src=""/><br/>
-    <form action="/api/predict" enctype='multipart/form-data' method="POST" id="form1" target="nm_iframe">
+    <form action="/api/img_predict" enctype='multipart/form-data' method="POST" id="form2" target="nm_iframe">
         <input type="file" id="selectImg" name="testfile" >
-        <input type="text" name = "text">
         <br/>
         <br/>
-        <input type="submit" id="test_btn" onclick=predict() value="Test!"/>
+        <input type="submit" id="test_btn" value="Test!"/>
         <input type="button" id="reset_btn" onclick=Reset() value="Reset"/>
     </form>
     <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
@@ -30,17 +29,40 @@
 </html>
 
 <script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<script type="text/javascript" src='/static-files/jquery.form.js'></script>
 <!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript">
     function Reset() {
         window.location.reload();
     }
-    function predict() {
-        alert("sb")
-        //$.post('/api/predict', {}, function (result, status) {
-            //alert(result);
-        //    $('#test_status').html('预测结果：'+ result);
-      //  });
-    }
+    $(function(){
+        /** 验证文件是否导入成功  */
+
+        $("#form2").ajaxForm(function(label){
+            $('#test_status').html('预测结果：'+ label);
+        });
+    });
+
+    // function readImg() {
+    //     var imgFile = document.getElementById('imgsrc').files[0];
+    //     var fileReader = new FileReader();
+    //     fileReader.onload
+    //     {
+    //         document.getElementById('image1').src = fileReader.result;
+    //     }
+    //     fileReader.readAsDataURL(imgFile);
+    // }
+
+    document.getElementById('selectImg').addEventListener('change',()=>{
+        const file = document.getElementById('selectImg');
+        const fileObj = file.files[0];
+        const windowURL = window.URL || window.webkitURL;
+        const img = document.getElementById('preview');
+
+        if(file && fileObj) {
+            const dataURl = windowURL.createObjectURL(fileObj);
+            img.setAttribute('src',dataURl);
+        }
+    },false)
 
 </script>

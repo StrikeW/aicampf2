@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+    <meta name="theme-color" content="#000000">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="./css/style.css"/>
+    <title>MLflow</title>
+</head>
+<body>
+<noscript>
+    You need to enable JavaScript to run this app.
+</noscript>
+<div class="title">
+    <h1>Team F2 AI Demo</h1>
+</div>
+<div class="container">
+    <form action="/api/train" enctype='multipart/form-data'  method="post" id="form1" target="nm_iframe">
+        <p>Choose model method:</p>
+        <select name="model", id = "model">
+            {% for m in my_models %}
+            <option value="{{m}}">{{m}}</option>
+            {% endfor %}
+        </select>
+        <br/>
+        <br/>
+        <textarea name="conf" id = "conf" rows="10" cols="50">{"learning_rate":0.001, "num_steps":2, "batch_size":128}</textarea>
+        <br/>
+        <br/>
+        <input type="file" name="datafile" id="datafile"><br/>
+        <input type="submit" id = "train_btn" value = "Train!">
+    </form>
+    <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
+    <br/>
+    <span id="train_status">训练状态：未开始</span>
+    <br/>
+    <br/>
+    <input type="button" id = "deploy_btn" onclick=deploy() value = "Deploy!">
+</div>
+<!--
+  This HTML file is a template.
+  If you open it directly in the browser, you will see an empty page.
+
+  You can add webfonts, meta tags, or analytics to this file.
+  The build step will place the bundled scripts into the <body> tag.
+
+  To begin the development, run `npm start` or `yarn start`.
+  To create a production bundle, use `npm run build` or `yarn build`.
+-->
+</body>
+</html>
+
+<script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<script type="text/javascript" src='/static-files/jquery.form.js'></script>
+<!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+<script type="text/javascript" >
+    var submitted = 1;
+    var model_id;
+    $(function(){
+        $("#form1").ajaxForm(function(result){
+            var dic = JSON.parse(result)
+            $('#train_status').html('训练状态：'+ result);
+            model_id = dic.Result.mid
+            alert(model_id)
+            submitted = 0;
+        });
+    });
+
+    function query() {
+        if (submitted === 0)
+            $.post('/api/train', {}, function(result,status) {
+                $('#train_status').html('训练状态：'+ result);
+            });
+    }
+    function deploy() {
+        //alert(model_id)
+        $.post('/api/deploy', {mid:model_id}, function(result, status) {
+            alert(result);
+        })
+    }
+</script>
+

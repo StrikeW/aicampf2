@@ -4,39 +4,29 @@ import re
 import six
 import sys
 
+import numpy as np
 from server.model import cnn_mnist
 from flask import Response, request
 from google.protobuf.json_format import ParseDict
 from querystring_parser import parser
 from server.image_cli import ImageCli
+
 import server.deployer as deployer
 
-def _get_request_message(request_message, flask_request=request):
-    if flask_request.method == 'GET' and len(flask_request.query_string) > 0:
-        # This is a hack to make arrays of length 1 work with the parser.
-        # for example experiment_ids%5B%5D=0 should be parsed to {experiment_ids: [0]}
-        # but it gets parsed to {experiment_ids: 0}
-        # but it doesn't. However, experiment_ids%5B0%5D=0 will get parsed to the right
-        # result.
-        query_string = re.sub('%5B%5D', '%5B0%5D', flask_request.query_string.decode("utf-8"))
-        request_dict = parser.parse(query_string, normalized=True)
-        ParseDict(request_dict, request_message)
-        return request_message
+from server.dal.entities import Model, Deploy
+from server.dal import DBSession
 
-    request_json = flask_request.get_json(force=True, silent=True)
 
-    # Older clients may post their JSON double-encoded as strings, so the get_json
-    # above actually converts it to a string. Therefore, we check this condition
-    # (which we can tell for sure because any proper request should be a dictionary),
-    # and decode it a second time.
-    if isinstance(request_json, six.string_types):
-        request_json = json.loads(request_json)
-
-    # If request doesn't have json body then assume it's empty.
-    if request_json is None:
-        request_json = {}
-    ParseDict(request_json, request_message)
-    return request_message
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return round(float(obj), 4)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)
 
 
 def _not_implemented():
@@ -44,70 +34,61 @@ def _not_implemented():
     response.status_code = 404
     return response
 
-
-# def _message_to_json(message):
-    # # preserving_proto_field_name keeps the JSON-serialized form snake_case
-    # return MessageToJson(message, preserving_proto_field_name=True)
-
-_TEXT_EXTENSIONS = ['txt', 'yaml', 'json', 'js', 'py', 'csv', 'md', 'rst', 'MLmodel', 'MLproject']
-
-
-# def _get_run():
-    # request_message = _get_request_message(GetRun())
-    # response_message = GetRun.Response()
-    # response_message.run.MergeFrom(_get_store().get_run(request_message.run_uuid).to_proto())
-    # response = Response(mimetype='application/json')
-    # response.set_data(_message_to_json(response_message))
-    # return response
-
-
-# def _get_paths(base_path):
-    # """
-    # A service endpoints base path is typically something like /preview/mlflow/experiment.
-    # We should register paths like /api/2.0/preview/mlflow/experiment and
-    # /ajax-api/2.0/preview/mlflow/experiment in the Flask router.
-    # """
-    # return ['/api/2.0{}'.format(base_path), '/ajax-api/2.0{}'.format(base_path)]
-
 def _hello():
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"hello": "world"}');
     return resp
 
-def train_model(name, conf):
+def _train_model(name, conf):
     if name == "CNN":
-        cnn_mnist.set_parameter(conf)
-        info = cnn_mnist.train()
-        dic = json.loads(conf)[0]
+        dic = json.loads(conf)
+        cnn_mnist.set_parameter(dic)
+        train_ret = cnn_mnist.train()
+
+        m = Model()
+        m.saved_path = train_ret['save_path']
+        m.type = 1
+        m.name = 'cnn'
+        m.hyper_params = conf
+        m.accuracy = train_ret['acc']
+
+        with DBSession() as sess:
+            sess.add(m)
+            sess.commit()
+            sess.close()
+            print('Insert a trained model. id=%d' % m.mid)
+
+        train_ret['mid'] = m.mid
+
         ans = {}
         ans['Conf'] = dic
-        ans['Result'] = info
-        return json.dumps(ans)
+        ans['Result'] = train_ret
+
+        return json.dumps(ans, cls=MyEncoder)
 
 def _train(req=request):
-    resp = Response(mimetype='text/plain')
-    resp.set_data(u'Task submit successful!');
     if req.method == "POST":
-        #data = req.form['file']
+        print(len(req.files))
+        # data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        return train_model(name, conf)
-    # train
+        return _train_model(name, conf)
 
+    resp = Response(mimetype='text/plain')
+    resp.set_data(u'Task submit successful!');
     return resp
 
 def _deploy(req = request):
-    if req.method == "POST":
-        # path = req.form['model']
-        mid = req.form['mid']
+    mid = req.form['mid']
 
-    # TODO
     ret = deployer.deploy_model(mid = 5)
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
     return resp
 
 def _img_predict(req=request):
+    f = req.files['testfile'].read()
+    img = list(f)
     # TODO
     imgcli = ImageCli()
     imgcli.connect()
@@ -126,8 +107,8 @@ def get_endpoints():
     # a fake handler
     ret = [('/api/hello', HANDLERS['hello'], ['GET']),
             ('/api/train', HANDLERS['train'], ['POST']),
-            ('/api/deploy', HANDLERS['deploy'], ['GET']),
-            ('/api/imgpredict', HANDLERS['imgpredict'], ['GET']),
+            ('/api/deploy', HANDLERS['deploy'], ['POST']),
+            ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
             ]
     return ret
 
@@ -137,5 +118,5 @@ HANDLERS = {
         "hello": _hello,
         'train': _train,
         'deploy': _deploy,
-        'imgpredict': _img_predict,
+        'img_predict': _img_predict,
 }
