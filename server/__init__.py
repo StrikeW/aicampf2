@@ -2,7 +2,6 @@ import os
 
 from flask import Flask, send_from_directory, make_response, render_template
 from server import handlers
-from server.utils.process import exec_cmd
 
 FILE_STORE_ENV_VAR = "MLFLOW_SERVER_FILE_STORE"
 ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"
@@ -69,22 +68,3 @@ def show_test():
 def serve():
     return send_from_directory(STATIC_DIR, 'index.html')
 
-
-# def _run_server(file_store_path, default_artifact_root, host, port, workers, static_prefix):
-def _run_server(host, port, workers, static_prefix):
-    """
-    Run the MLflow server, wrapping it in gunicorn
-    :param static_prefix: If set, the index.html asset will be served from the path static_prefix.
-                          If left None, the index.html asset will be served from the root path.
-    :return: None
-    """
-    env_map = {}
-    # if file_store_path:
-        # env_map[FILE_STORE_ENV_VAR] = file_store_path
-    # if default_artifact_root:
-        # env_map[ARTIFACT_ROOT_ENV_VAR] = default_artifact_root
-    if static_prefix:
-        env_map[STATIC_PREFIX_ENV_VAR] = static_prefix
-    bind_address = "%s:%s" % (host, port)
-    exec_cmd(["gunicorn", "-b", bind_address, "-w", "%s" % workers, "server:app"],
-             env=env_map, stream_output=True)
