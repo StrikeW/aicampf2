@@ -18,7 +18,7 @@
     <h1>Team F2 AI Demo</h1>
 </div>
 <div class="container">
-    <form action="" enctype='multipart/form-data'  method="post" id="form1">
+    <form action="/api/train" enctype='multipart/form-data'  method="post" id="form1" target="nm_iframe">
         <p>Choose model method:</p>
         <select name="model", id = "model">
             {% for m in my_models %}
@@ -31,8 +31,10 @@
         <br/>
         <br/>
         <input type="file" name="datafile" id="datafile"><br/>
-        <input type="button" id = "train_btn" onclick=train() value = "Train!">
-    </form><br/>
+        <input type="submit" id = "train_btn" value = "Train!">
+    </form>
+    <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
+    <br/>
     <span id="train_status">训练状态：未开始</span>
     <br/>
     <br/>
@@ -52,28 +54,21 @@
 </html>
 
 <script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<script type="text/javascript" src='/static-files/jquery.form.js'></script>
 <!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript" >
     var submitted = 1;
     var model_id;
-    function train() {
-        var model = document.getElementById("model").value;
-        var conf = document.getElementById("conf").value;
-        //var file = document.getElementById("datafile").files[0];
-        //alert(model); //alert(conf);
-        //alert(file)
-
-        $.post('/api/train', {model:model, conf:conf, datafile:1}, function(result,status) {
-            //alert(result);
-            //alert(status);
+    $(function(){
+        $("#form1").ajaxForm(function(result){
             var dic = JSON.parse(result)
-
             $('#train_status').html('训练状态：'+ result);
             model_id = dic.Result.save_path
             //alert(model_id)
             submitted = 0;
         });
-    }
+    });
+
     function query() {
         if (submitted === 0)
             $.post('/api/train', {}, function(result,status) {
