@@ -6,6 +6,7 @@ import sys
 
 import numpy as np
 from server.model import cnn_mnist
+from server.model import cnn_cifar
 from flask import Response, request
 from google.protobuf.json_format import ParseDict
 from querystring_parser import parser
@@ -39,12 +40,11 @@ def _hello():
     resp.set_data(u'{"hello": "world"}');
     return resp
 
-def _train_model(name, conf):
+def _train_model(name, conf, data):
     if name == "CNN":
         dic = json.loads(conf)
         cnn_mnist.set_parameter(dic)
-        train_ret = cnn_mnist.train()
-
+        train_ret = cnn_cifar.train(data)
         m = Model()
         m.saved_path = train_ret['save_path']
         m.type = 1
@@ -52,11 +52,11 @@ def _train_model(name, conf):
         m.hyper_params = conf
         m.accuracy = train_ret['acc']
 
-        with DBSession() as sess:
-            sess.add(m)
-            sess.commit()
-            sess.close()
-            print('Insert a trained model. id=%d' % m.mid)
+#        with DBSession() as sess:
+ #           sess.add(m)
+  #          sess.commit()
+   #         sess.close()
+    #        print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
 
@@ -69,10 +69,10 @@ def _train_model(name, conf):
 def _train(req=request):
     if req.method == "POST":
         print(len(req.files))
-        # data = req.files['datafile']
+        data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        return _train_model(name, conf)
+        return _train_model(name, conf, data)
 
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
