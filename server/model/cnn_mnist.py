@@ -14,10 +14,12 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import sys
+import os
 from server.model import datasets
 import tensorflow as tf
 import pandas as pd
 from tensorflow.contrib import predictor
+from server import config
 import json
 
 
@@ -32,8 +34,8 @@ num_classes = 10 # MNIST total classes (0-9 digits)
 dropout = 0.25 # Dropout, probability to drop a unit
 
 #set parameter
-def set_parameter(conf):
-    dic = json.loads(conf)[0]
+def set_parameter(dic):
+    # dic = json.loads(conf)[0]
     global learning_rate, num_steps, batch_size
     learning_rate = dic['learning_rate'];
     num_steps = dic['num_steps']
@@ -179,9 +181,9 @@ def train():
     print('model is saved to [%s]' % saved_estimator_path)
 
     model_info = {}
-    model_info['acc'] = str(acc)
-    model_info['save_path'] = saved_estimator_path
-    model_info['loss'] = str(loss)
+    model_info['acc'] = acc
+    model_info['save_path'] = os.path.join(config.project_root, saved_estimator_path)
+    model_info['loss'] = loss
     return model_info
 
 if __name__ == "__main__":
