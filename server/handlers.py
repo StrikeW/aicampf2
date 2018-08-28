@@ -46,11 +46,11 @@ def _train_model(name, conf, data):
         m.hyper_params = conf
         m.accuracy = train_ret['acc']
 
-        with DBSession() as sess:
-            sess.add(m)
-            sess.commit()
+    #    with DBSession() as sess:
+    #        sess.add(m)
+    #        sess.commit()
 
-        print('Insert a trained model. id=%d' % m.mid)
+    #    print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
 
@@ -84,7 +84,10 @@ def _deploy(req = request):
     resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
     return resp
 
+def _get_modellist(req = request):
+    
 
+    return '[{"name": "a", "accuary": 0.1, "conf": {\"num_step\": 1}}]';
 
 serv_clis = []
 
@@ -134,6 +137,7 @@ def get_endpoints():
             ('/api/train', HANDLERS['train'], ['POST']),
             ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
+            ('/api/img_predict', HANDLERS['get_modellist'], ['POST', 'GET']),
             ]
     return ret
 
@@ -144,4 +148,5 @@ HANDLERS = {
         'train': _train,
         'deploy': _deploy,
         'img_predict': _img_predict,
+        'get_modellist': _get_modellist
 }
