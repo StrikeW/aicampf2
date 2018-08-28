@@ -64,7 +64,10 @@ def _train(req=request):
         data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        upload_path = os.path.join(secure_filename(data.filename))
+        basepath = os.path.dirname(__file__)
+        dataset_path = os.path.join(basepath, "dataset")
+        upload_path = os.path.join(dataset_path, secure_filename(data.filename))
+        #print(upload_path)
         data.save(upload_path)
         return _train_model(name, conf, upload_path)
 
