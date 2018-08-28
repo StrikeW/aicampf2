@@ -37,7 +37,7 @@ def _train_model(name, conf, file_path):
     if name == "CNN":
         dic = json.loads(conf)
         cnn_mnist.set_parameter(dic)
-        train_ret = cnn_mnist.train()
+        train_ret = cnn_mnist.train(file_path)
         m = Model()
         m.saved_path = train_ret['save_path']
         m.type = 1
@@ -84,8 +84,23 @@ def _deploy(req = request):
     return resp
 
 def _get_modellist(req = request):
+    models = []
+    with DBSession() as sess:
+        for m in sess.query(Model).all():
+            d = {}
+            d['id'] = m.mid
+            d['model'] = m.name
+            d['acc'] = float(m.accuracy)
+            d['conf'] = m.hyper_params
+            models.append(d)
 
-    return '[{"name": "a", "accuary": 0.1, "conf": {\"num_step\": 1}}]';
+    resp = {}
+    resp['code'] = 0
+    resp['msg'] = ''
+    resp['count'] = len(models)
+    resp['data'] = models
+
+    return json.dumps(resp, cls=MyEncoder)
 
 serv_clis = []
 
@@ -105,7 +120,7 @@ def _img_ping():
 
 
 def _img_predict(req=request):
-    f = req.files['testfile']
+    f = req.files['file']
     file_path = os.path.join(config.upload_path, f.filename)
     f.save(file_path)
 
@@ -139,7 +154,6 @@ def get_endpoints():
             ('/api/train', HANDLERS['train'], ['POST']),
             ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
-            ('/api/img_predict', HANDLERS['get_modellist'], ['POST', 'GET']),
             ('/api/get_model_list', HANDLERS['get_model_list'], ['POST', 'GET']),
             ]
     return ret
@@ -151,6 +165,6 @@ HANDLERS = {
         'train': _train,
         'deploy': _deploy,
         'img_predict': _img_predict,
-        'get_modellist': _get_modellist,
-        'get_model_list': _get_model_list
+        # 'get_modellist': _get_modellist,
+        'get_model_list': _get_modellist,
 }
