@@ -45,10 +45,11 @@ def _train_model(name, conf, data):
         m.hyper_params = conf
         m.accuracy = train_ret['acc']
 
-      #  with DBSession() as sess:
-      #      sess.add(m)
-      #      sess.commit()
-      #      print('Insert a trained model. id=%d' % m.mid)
+        with DBSession() as sess:
+            sess.add(m)
+            sess.commit()
+
+        print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
 
@@ -60,16 +61,14 @@ def _train_model(name, conf, data):
 
 def _train(req=request):
     if req.method == "POST":
-        print(len(req.files))
-        data = req.files['datafile']
+        f = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        basepath = os.path.dirname(__file__)
-        dataset_path = os.path.join(basepath, "dataset")
-        upload_path = os.path.join(dataset_path, secure_filename(data.filename))
+        file_path = os.path.join(config.upload_path, f.filename)
+        f.save(file_path)
+
         #print(upload_path)
-        data.save(upload_path)
-        return _train_model(name, conf, upload_path)
+        return _train_model(name, conf, file_path)
 
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
@@ -106,7 +105,7 @@ def _img_ping():
 def _img_predict(req=request):
     f = req.files['testfile']
     file_path = os.path.join(config.upload_path, f.filename)
-    f.save(os.path.join(config.upload_path, f.filename))
+    f.save(file_path)
 
     print('img_predict: file saved: %s' % file_path)
 
