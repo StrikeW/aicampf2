@@ -159,8 +159,9 @@ def predict(export_dir, file_path):
     # print("Predict Accuracy:", accuracy)
     return predictions
 
-def train():
-    (x_train, y_train), (x_test, y_test) = datasets.load_mnist()
+def train(file):
+    #(x_train, y_train), (x_test, y_test) = datasets.load_mnist()
+    (x_train, y_train), (x_test, y_test),labels = datasets.load_data(file)
     x_train = x_train.astype(np.float32).reshape(x_train.shape[0], 784)
     y_train = y_train.astype(np.float32)
 
@@ -196,7 +197,7 @@ def train():
     return model_info
 
 if __name__ == "__main__":
-    train()
+    train("D:/darkd/mnist_train.csv")
     if len(sys.argv) <= 1:
         print('lack of arguments!')
         exit(-1)
