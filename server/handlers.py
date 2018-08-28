@@ -125,7 +125,6 @@ def _img_predict(req=request):
     f.save(file_path)
 
     print('img_predict: file saved: %s' % file_path)
-    return u'{"code": 0, "result": "7"}'
     global serv_clis
     if len(serv_clis) == 0:
         imgcli = ImageCli()
@@ -137,8 +136,6 @@ def _img_predict(req=request):
     ret = imgcli.client.predict(file_path)
     print('_img_predict: prediction=%s' % ret)
 
-    resp = Response(mimetype='application/json')
-    resp.set_data(u'{"code": 0, "result": "%s"}' % ret[0]);
     return u'{"code": 0, "result": "%s"}' % ret[0]
 
 def _get_model_list(req = request):

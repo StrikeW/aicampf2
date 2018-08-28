@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Machine Learning Flow</title>
     <link rel="stylesheet" href="/static-files/css/layui.css">
+    <script src="/static-files/layui.js"></script>
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
@@ -78,7 +79,7 @@
     </div>
     <div class="layui-footer">
         <!-- 底部固定区域 -->
-        © layui.com - 底部固定区域
+        © AI Camp Team F2
     </div>
 </div>
 
@@ -94,7 +95,15 @@
             layer.msg('训练完成')
             var dic = JSON.parse(result)
             $('#train_status').html("训练结果：准确率为"+dic.Result.acc);
-            model_id = dic.Result.save_path
+            model_id = dic.Result.mid
+
+            layui.use('table', function() {
+                var table = layui.table;
+                table.reload('test', {
+                    url: '/api/get_model_list'
+                })
+            });
+
         });
     });
 
@@ -112,7 +121,6 @@
     }
 
 </script>
-<script src="/static-files/layui.js"></script>
 <script>
     //JavaScript代码区域
     layui.use('element', function () {
