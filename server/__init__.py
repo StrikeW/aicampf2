@@ -45,6 +45,19 @@ def _load_model():
             a.append(line)
     return a
 
+#def load_config(conf_path):
+#    fpath = os.path.join(STATIC_DIR, conf_path)
+#    with open(fpath) as f:
+#        a = f.read()
+#        return a
+
+# Serve the index.html for the React App for all other routes.
+@app.route('/model_cnn')
+def show_model_cnn():
+    return render_template('model_cnn.html')
+@app.route('/test_cnn')
+def show_test_cnn():
+    return render_template('test_cnn.html')
 @app.route('/models')
 def show_models():
     models = _load_model()

@@ -186,7 +186,7 @@ def train(data_files):
     return model_info
 
 if __name__ == "__main__":
-    train()
+    train("D:/darkd/cifar10_train.csv")
     if len(sys.argv) <= 1:
         print('lack of arguments!')
         exit(-1)
