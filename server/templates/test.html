@@ -42,27 +42,4 @@
             $('#test_status').html('预测结果：'+ obj.result);
         });
     });
-
-    // function readImg() {
-    //     var imgFile = document.getElementById('imgsrc').files[0];
-    //     var fileReader = new FileReader();
-    //     fileReader.onload
-    //     {
-    //         document.getElementById('image1').src = fileReader.result;
-    //     }
-    //     fileReader.readAsDataURL(imgFile);
-    // }
-
-    document.getElementById('selectImg').addEventListener('change',()=>{
-        const file = document.getElementById('selectImg');
-        const fileObj = file.files[0];
-        const windowURL = window.URL || window.webkitURL;
-        const img = document.getElementById('preview');
-
-        if(file && fileObj) {
-            const dataURl = windowURL.createObjectURL(fileObj);
-            img.setAttribute('src',dataURl);
-        }
-    },false)
-
 </script>
