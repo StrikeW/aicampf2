@@ -12,7 +12,7 @@ env/bin/sqlacodegen mysql+pymysql://USERNAME:PASSWORD@IP_ADDRESS_OF_MYSQL_SERVER
 """
 
 # engine, this is a singleton if done in conjunction with a web application;
-#engine = create_engine('mysql+mysqldb://root:110@localhost:3306/aicamp')
+engine = create_engine('mysql+mysqldb://root:110@localhost:3306/aicamp')
 
 
 # class DatabaseConnection:
