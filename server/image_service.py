@@ -4,6 +4,7 @@
 # image service
 import sys
 import cv2
+import time
 import numpy as np
 from service import ImageService
 from thrift.transport import TSocket
@@ -16,9 +17,10 @@ from dal import DBSession
 from tensorflow.contrib import predictor
 
 class ImageHandler:
-    def __init__(self, predict_fn):
+    def __init__(self, predict_fn, mid):
         self.log = {}
         self.predict_fn = predict_fn
+        self.mid = mid
         print('init predictfn ok')
 
     def ping(self):
@@ -34,6 +36,8 @@ class ImageHandler:
         x_test[0] = img
 
         predictions = self.predict_fn( {"images": x_test} )
+
+
         print(predictions)
         return predictions['output']
 
@@ -48,13 +52,27 @@ def load_model(mid):
             # df = pd.DataFrame(predictions)
     return predict_fn
 
-def run_service(_host, _port, predict_fn):
-    handler = ImageHandler(predict_fn)
+def run_service(_host, _port, predict_fn, mid):
+
+    t1 =  time.time()
+    handler = ImageHandler(predict_fn, mid)
     processor = ImageService.Processor(handler)
     transport = TSocket.TServerSocket(host=_host, port=int(_port))
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
     server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    t2 = time.time()
+
+    dep = Deploy()
+    dep.mid = mid
+    dep.state = 0
+    dep.deploy_time = t2 - t1
+
+    with DBSession() as sess:
+        sess.add(dep)
+        sess.commit()
+        print('Insert a Deploy record. id=%d' % dep.mid)
+
     server.serve()
 
 if __name__ == "__main__":
@@ -63,5 +81,5 @@ if __name__ == "__main__":
     print('MNIST service start at host=127.0.0.1, port=9090')
     mid = int(sys.argv[1])
     predict_fn = load_model(mid)
-    run_service('127.0.0.1', 9090, predict_fn)
+    run_service('127.0.0.1', 9090, predict_fn, mid)
 

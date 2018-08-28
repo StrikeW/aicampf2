@@ -1,0 +1,17 @@
+title {
+    position: fixed;
+    margin-left: 10%;
+    margin-top: 5%;
+}
+
+textarea {
+    margin-left: 30%;
+    margin-top: 5%;
+    width: 100px;
+    height: 100px;
+}
+
+button {
+    position: absolute;
+
+}
