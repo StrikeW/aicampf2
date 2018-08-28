@@ -17,10 +17,12 @@ def load_cifar10(file):
   reader = csv.DictReader(f)
   labels = {}
   cnt = 0
-  train_x = np.zeros([tot_line // 5 * 4, 32*32*3])
-  train_y = np.zeros([tot_line // 5 * 4], dtype="int32")
-  test_x = np.zeros([tot_line // 5 * 4, 32*32*3])
-  test_y = np.zeros([tot_line // 5 * 4], dtype="int32")
+  train_sz = tot_line // 5 * 4
+  test_sz = tot_line - train_sz
+  train_x = np.zeros([train_sz, 32*32*3])
+  train_y = np.zeros([train_sz], dtype="int32")
+  test_x = np.zeros([test_sz, 32*32*3])
+  test_y = np.zeros([test_sz], dtype="int32")
   id = []
   for i in range(tot_line):
     id.append(i)
@@ -36,12 +38,12 @@ def load_cifar10(file):
     if label not in labels:
       labels[label] = cnt
       cnt += 1
-    if i < tot_line // 5:
+    if i < test_sz:
       test_x[i] = img
       test_y[i] = labels[label]
     else:
-      train_x[i - tot_line // 5] = img
-      test_y[i - tot_line // 5] = labels[label]
+      train_x[i - test_sz] = img
+      train_y[i - test_sz] = labels[label]
     tot += 1
     if tot % 5000 == 0:
       print(tot)
