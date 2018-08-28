@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Machine Learning Flow</title>
+    <link rel="stylesheet" href="/static-files/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">Machine Learning Flow</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="" href="javascript:;">模型训练</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/model_cnn"class="layui-this">CNN</a></dd>
+                        <dd><a href="/model_svm">SVM</a></dd>
+                        <dd><a href="/model_rl">RL</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+
+
+        <div style="padding: 10px;">
+            <form class="layui-form" action="" enctype='multipart/form-data' method="post" id="form1">
+
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                    <legend>模型参数与数据选择</legend>
+                </fieldset>
+
+                <div class="layui-form-item layui-form-text">
+                    <div class="layui-input-block" style="margin-left: 20px; margin-right: 20px;">
+            <textarea name="conf" id="conf" class="layui-textarea">[{"learning_rate":0.001,
+"num_steps":2,
+"batch_size":128
+}]</textarea>
+                    </div>
+                </div>
+
+                <input type="button" class="layui-btn" id="datafile" style="margin-left: 30px;" value="选择数据">
+                <br>
+
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                    <legend>模型训练与部署</legend>
+                </fieldset>
+
+
+
+            </form>
+            <input type="button" class="layui-btn layui-btn-normal" id="train_btn"
+                   style="margin-left: 30px; " value="开始训练" onclick=train()>
+            <span id="train_status" style="margin-left: 20px">未开始</span>
+            <br>
+            <br>
+            <input class="layui-btn layui-btn-normal" style="margin-left: 30px" type="button" id="deploy_btn" value="部署模型"
+                   onclick=deploy()>
+        </div>
+    </div>
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+
+<script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+<script type="text/javascript">
+    var model_id;
+
+    function train() {
+        layer.msg('开始训练')
+        var model = "CNN";
+        $('#train_status').html("正在训练......");
+        var conf = document.getElementById("conf").value;
+        //var file = document.getElementById("datafile").files[0];
+        //alert(model); //alert(conf);
+        //alert(file)
+        $.post('/api/train', {model: model, conf: conf, datafile: 1}, function (result, status) {
+
+            layer.msg('训练完成')
+            var dic = JSON.parse(result)
+
+            $('#train_status').html("训练结果：准确率为"+dic.Result.acc);
+            model_id = dic.Result.save_path
+            //alert(model_id)
+        });
+    }
+
+    function deploy() {
+        //alert(model_id)
+        layer.msg("正在部署")
+        $.post('/api/deploy', {model: model_id}, function (result, status) {
+            layer.msg(result);
+        })
+    }
+</script>
+<script src="/static-files/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+</script>
+<script>
+    layui.use('upload', function () {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        //选完文件后不自动上传
+        upload.render({
+            elem: '#datafile'
+            , accept: 'file' //普通文件
+            , auto: false
+            //,multiple: true
+            , done: function (res) {
+                console.log(res)
+            }
+        });
+    });
+</script>
+</body>
+</html>
