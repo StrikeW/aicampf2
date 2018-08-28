@@ -6,10 +6,7 @@ import pandas
 import numpy as np
 import random
 
-def load_mnist():
-  return tensorflow.keras.datasets.mnist.load_data()
-
-def load_cifar10(file):
+def load_data(file):
   tot_line = -1
   for index, line in enumerate(open(file, 'r')):
     tot_line += 1
@@ -19,9 +16,9 @@ def load_cifar10(file):
   cnt = 0
   train_sz = tot_line // 5 * 4
   test_sz = tot_line - train_sz
-  train_x = np.zeros([train_sz, 32*32*3])
+  train_x = np.zeros([train_sz, 28*28])
   train_y = np.zeros([train_sz], dtype="int32")
-  test_x = np.zeros([test_sz, 32*32*3])
+  test_x = np.zeros([test_sz, 28*28])
   test_y = np.zeros([test_sz], dtype="int32")
   id = []
   for i in range(tot_line):
@@ -34,7 +31,7 @@ def load_cifar10(file):
       continue
     i = id[tot]
     url, label = row['url'], row['label']
-    img = list(np.array(cv2.imread(url)).ravel())
+    img = list(np.array(cv2.imread(url, cv2.IMREAD_GRAYSCALE)).ravel())
     if label not in labels:
       labels[label] = cnt
       cnt += 1

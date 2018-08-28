@@ -4,5 +4,5 @@
 
 __all__ = ['upload_path', 'project_root']
 
-project_root = '/Users/siyuan/workspace/AICamp/aicampf2'
-upload_path = '/Users/siyuan/workspace/AICamp/aicampf2/uploads'
+project_root = 'C:\\Users\\admin\\aicampf2'
+upload_path = 'C:\\Users\\admin\\aicampf2\\uploads'

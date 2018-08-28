@@ -61,7 +61,7 @@ def _train_model(name, conf, file_path):
 
 def _train(req=request):
     if req.method == "POST":
-        f = req.files['datafile']
+        f = req.files['file']
         conf = req.form['conf']
         name = req.form['model']
         file_path = os.path.join(config.upload_path, f.filename)
@@ -83,7 +83,9 @@ def _deploy(req = request):
     resp.set_data(u'{"code": 0, "msg": "depoly successful"}');
     return resp
 
+def _get_modellist(req = request):
 
+    return '[{"name": "a", "accuary": 0.1, "conf": {\"num_step\": 1}}]';
 
 serv_clis = []
 
@@ -122,7 +124,11 @@ def _img_predict(req=request):
 
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"code": 0, "result": "%s"}' % ret[0]);
-    return resp
+    return u'{"code": 0, "result": "%s"}' % ret[0]
+
+def _get_model_list(req = request):
+    return '{"code":0,"msg":"","count":1,"data":[{"id": 10000, "model": "CNN", "acc": 0.998, "conf": "emmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"}]}';
+    #return '{"code":0,"msg":"","count":1,"data":[{"id":10002,"model":"user-2","acc":"女","conf":"城市-2"}]}';
 
 def get_endpoints():
     """
@@ -133,6 +139,8 @@ def get_endpoints():
             ('/api/train', HANDLERS['train'], ['POST']),
             ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
+            ('/api/img_predict', HANDLERS['get_modellist'], ['POST', 'GET']),
+            ('/api/get_model_list', HANDLERS['get_model_list'], ['POST', 'GET']),
             ]
     return ret
 
@@ -143,4 +151,6 @@ HANDLERS = {
         'train': _train,
         'deploy': _deploy,
         'img_predict': _img_predict,
+        'get_modellist': _get_modellist,
+        'get_model_list': _get_model_list
 }
