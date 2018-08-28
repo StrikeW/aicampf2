@@ -158,6 +158,7 @@ layui.use('table', function(){
   table.render({
     elem: '#test'
     ,url:'/api/get_model_list'
+    ,initSort: {field:'id', type:'desc'}
     ,cols: [[
       {type:'checkbox'}
       ,{field:'id', width:80, sort: true, title: 'ID'}
