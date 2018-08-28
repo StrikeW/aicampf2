@@ -78,7 +78,8 @@
     $(function(){
         /** 验证文件是否导入成功  */
         $("#form2").ajaxForm(function(label){
-            $('#test_status').html('预测结果：'+ label);
+            var obj = JSON.parse(label)
+            $('#test_status').html('预测结果：'+ obj.result);
         });
     });
 </script>
