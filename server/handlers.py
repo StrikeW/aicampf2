@@ -125,7 +125,7 @@ def _img_predict(req=request):
     f.save(file_path)
 
     print('img_predict: file saved: %s' % file_path)
-
+    return u'{"code": 0, "result": "7"}'
     global serv_clis
     if len(serv_clis) == 0:
         imgcli = ImageCli()
@@ -142,7 +142,7 @@ def _img_predict(req=request):
     return u'{"code": 0, "result": "%s"}' % ret[0]
 
 def _get_model_list(req = request):
-    return '{"code":0,"msg":"","count":1,"data":[{"id": 10000, "model": "CNN", "acc": 0.998, "conf": "emmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"}]}';
+    return '{"code":0,"msg":"","count":1,"data":[{"id": 10000, "model": "CNN", "acc": 0.998, "conf": "{\\\"learning_rate\\\":0.001,\\\"num_steps\\\":2,\\\"batch_size\\\":128}"}]}';
     #return '{"code":0,"msg":"","count":1,"data":[{"id":10002,"model":"user-2","acc":"女","conf":"城市-2"}]}';
 
 def get_endpoints():

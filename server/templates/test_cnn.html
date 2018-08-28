@@ -67,7 +67,7 @@
             </form>
             <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
             <br/>
-            <span id="train_status"style="margin-left: 30px; " style="margin-left: 20px">未开始</span>
+            <span id="test_status"style="margin-left: 30px; " style="margin-left: 20px">未开始</span>
             <br>
             <br>
         </div>
@@ -86,7 +86,7 @@
         /** 验证文件是否导入成功  */
         $("#form2").ajaxForm(function(label){
             var obj = JSON.parse(label)
-            $('#test_status').html('预测结果：'+ obj.result);
+            $('#test_status').text('预测结果：'+ obj.result);
         });
     });
 </script>
