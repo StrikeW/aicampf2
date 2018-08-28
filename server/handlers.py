@@ -46,11 +46,11 @@ def _train_model(name, conf, data):
         m.hyper_params = conf
         m.accuracy = train_ret['acc']
 
-    #    with DBSession() as sess:
-    #        sess.add(m)
-    #        sess.commit()
+        with DBSession() as sess:
+            sess.add(m)
+            sess.commit()
 
-    #    print('Insert a trained model. id=%d' % m.mid)
+        print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
 
@@ -85,7 +85,6 @@ def _deploy(req = request):
     return resp
 
 def _get_modellist(req = request):
-    
 
     return '[{"name": "a", "accuary": 0.1, "conf": {\"num_step\": 1}}]';
 
@@ -126,7 +125,7 @@ def _img_predict(req=request):
 
     resp = Response(mimetype='application/json')
     resp.set_data(u'{"code": 0, "result": "%s"}' % ret[0]);
-    return resp
+    return u'{"code": 0, "result": "%s"}' % ret[0]
 
 def get_endpoints():
     """
