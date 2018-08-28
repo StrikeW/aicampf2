@@ -36,7 +36,7 @@ def _hello():
 def _train_model(name, conf, data):
     if name == "CNN":
         dic = json.loads(conf)
-        cnn_mnist.set_parameter(dic)
+        cnn_cifar.set_parameter(dic)
         train_ret = cnn_cifar.train(data)
         m = Model()
         m.saved_path = train_ret['save_path']
