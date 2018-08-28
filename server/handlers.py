@@ -8,6 +8,7 @@ from server.model import cnn_cifar
 from flask import Response, request
 from server.image_cli import ImageCli
 from server import config
+from werkzeug.utils import secure_filename
 
 import server.deployer as deployer
 
@@ -44,10 +45,10 @@ def _train_model(name, conf, data):
         m.hyper_params = conf
         m.accuracy = train_ret['acc']
 
-        with DBSession() as sess:
-            sess.add(m)
-            sess.commit()
-            print('Insert a trained model. id=%d' % m.mid)
+      #  with DBSession() as sess:
+      #      sess.add(m)
+      #      sess.commit()
+      #      print('Insert a trained model. id=%d' % m.mid)
 
         train_ret['mid'] = m.mid
 
@@ -63,7 +64,9 @@ def _train(req=request):
         data = req.files['datafile']
         conf = req.form['conf']
         name = req.form['model']
-        return _train_model(name, conf, data)
+        upload_path = os.path.join(secure_filename(data.filename))
+        data.save(upload_path)
+        return _train_model(name, conf, upload_path)
 
     resp = Response(mimetype='text/plain')
     resp.set_data(u'Task submit successful!');
