@@ -33,11 +33,11 @@ def _hello():
     resp.set_data(u'{"hello": "world"}');
     return resp
 
-def _train_model(name, conf, data):
+def _train_model(name, conf, file_path):
     if name == "CNN":
         dic = json.loads(conf)
-        cnn_cifar.set_parameter(dic)
-        train_ret = cnn_cifar.train(data)
+        cnn_mnist.set_parameter(dic)
+        train_ret = cnn_mnist.train()
         m = Model()
         m.saved_path = train_ret['save_path']
         m.type = 1
