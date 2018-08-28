@@ -128,6 +128,10 @@ def _img_predict(req=request):
     resp.set_data(u'{"code": 0, "result": "%s"}' % ret[0]);
     return resp
 
+def _get_model_list(req = request):
+    return '{"code":0,"msg":"","count":1,"data":[{"id": 10000, "model": "CNN", "acc": 0.998, "conf": "emmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"}]}';
+    #return '{"code":0,"msg":"","count":1,"data":[{"id":10002,"model":"user-2","acc":"女","conf":"城市-2"}]}';
+
 def get_endpoints():
     """
     :return: List of tuples (path, handler, methods)
@@ -138,6 +142,7 @@ def get_endpoints():
             ('/api/deploy', HANDLERS['deploy'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['img_predict'], ['POST', 'GET']),
             ('/api/img_predict', HANDLERS['get_modellist'], ['POST', 'GET']),
+            ('/api/get_model_list', HANDLERS['get_model_list'], ['POST', 'GET']),
             ]
     return ret
 
@@ -148,5 +153,6 @@ HANDLERS = {
         'train': _train,
         'deploy': _deploy,
         'img_predict': _img_predict,
-        'get_modellist': _get_modellist
+        'get_modellist': _get_modellist,
+        'get_model_list': _get_model_list
 }
