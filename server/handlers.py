@@ -36,6 +36,7 @@ def _hello():
 def _train_model(name, conf, data):
     if name == "CNN":
         dic = json.loads(conf)
+        print(dic)
         cnn_cifar.set_parameter(dic)
         train_ret = cnn_cifar.train(data)
         m = Model()
@@ -61,7 +62,7 @@ def _train_model(name, conf, data):
 
 def _train(req=request):
     if req.method == "POST":
-        f = req.files['datafile']
+        f = req.files['file']
         conf = req.form['conf']
         name = req.form['model']
         file_path = os.path.join(config.upload_path, f.filename)

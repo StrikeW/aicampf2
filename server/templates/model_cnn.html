@@ -35,17 +35,17 @@
 
         <div style="padding: 10px;">
             <form class="layui-form" action="/api/train" enctype='multipart/form-data' method="POST" id="form1">
-
+                <input type="text" name="model", id = "model", value = "CNN", style = "visibility:hidden;display:none">
                 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
                     <legend>模型参数与数据选择</legend>
                 </fieldset>
 
                 <div class="layui-form-item layui-form-text">
                     <div class="layui-input-block" style="margin-left: 20px; margin-right: 20px;">
-            <textarea name="conf" id="conf" class="layui-textarea">[{"learning_rate":0.001,
+            <textarea name="conf" id="conf" class="layui-textarea">{"learning_rate":0.001,
 "num_steps":2,
 "batch_size":128
-}]</textarea>
+}</textarea>
                     </div>
                 </div>
 
@@ -75,6 +75,8 @@
 <script type="text/javascript" src='/static-files/jquery.form.js'></script>
 <!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript">
+    //document.getElementById("model").style.visibility="hidden";
+    //document.getElementById("model").style.display="none";
     var model_id;
     $(function(){
         $("#form1").ajaxForm(function(result){
