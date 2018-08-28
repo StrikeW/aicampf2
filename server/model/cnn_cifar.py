@@ -1,10 +1,10 @@
 """ Convolutional Neural Network.
 
 Build and train a convolutional neural network with TensorFlow.
-This example is using the CIFAR database of handwritten digits
+This example is using the MNIST database of handwritten digits
 (http://yann.lecun.com/exdb/mnist/)
 
-This example is using TensorFlow layers API, see 'convolutional_network_raw' 
+This example is using TensorFlow layers API, see 'convolutional_network_raw'
 example for a raw implementation with variables.
 
 Author: Aymeric Damien
@@ -12,28 +12,34 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 """
 from __future__ import division, print_function, absolute_import
 
-import datasets
+import numpy as np
+import sys
+import os
+from server.model import datasets
 import tensorflow as tf
 import pandas as pd
 from tensorflow.contrib import predictor
+from server import config
+import json
 
 
-# mnist = input_data.read_data_sets("/tmp/data/", one_hot=False)
-
-
-# Load CIFAR10 data
-(x_train, y_train), (x_test, y_test) = datasets.load_cifar10()
-
-# Hyper-Parameters
+# Training Parameters
 learning_rate = 0.001
 num_steps = 2
 batch_size = 128
 
 # Network Parameters
-num_input = 1024 # CIFAR data input (img shape: 28*28)
-num_classes = 10 # CIFAR total classes (0-9 digits)
+num_input = 32*32*3 # MNIST data input (img shape: 28*28)
+num_classes = 10 # MNIST total classes (0-9 digits)
 dropout = 0.25 # Dropout, probability to drop a unit
 
+#set parameter
+def set_parameter(dic):
+    # dic = json.loads(conf)[0]
+    global learning_rate, num_steps, batch_size
+    learning_rate = dic['learning_rate'];
+    num_steps = dic['num_steps']
+    batch_size = dic['batch_size']
 
 # Create the neural network
 def conv_net(x_dict, n_classes, dropout, reuse, is_training):
@@ -42,10 +48,10 @@ def conv_net(x_dict, n_classes, dropout, reuse, is_training):
         # TF Estimator input is a dict, in case of multiple inputs
         x = x_dict['images']
 
-        # CIFAR data input is a 1-D vector of 784 features (28*28 pixels)
+        # MNIST data input is a 1-D vector of 784 features (28*28 pixels)
         # Reshape to match picture format [Height x Width x Channel]
         # Tensor input become 4-D: [Batch Size, Height, Width, Channel]
-        x = tf.reshape(x, shape=[-1, 28, 28, 1])
+        x = tf.reshape(x, shape=[-1, 32, 32, 3])
 
         # Convolution Layer with 32 filters and a kernel size of 5
         conv1 = tf.layers.conv2d(x, 32, 5, activation=tf.nn.relu)
@@ -88,10 +94,8 @@ def model_fn(features, labels, mode):
 
     # If prediction mode, early return
     if mode == tf.estimator.ModeKeys.PREDICT:
-        print('prediction mode')
+        print('PREDICT mode')
         return tf.estimator.EstimatorSpec(mode, predictions=pred_classes)
-    else:
-        print('training mode')
 
     # Define loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
@@ -114,27 +118,46 @@ def model_fn(features, labels, mode):
 
     return estim_specs
 
-def evaluate(model):
+def evaluate(model, x_test, y_test):
     # Evaluate the Model
     # Define the input function for evaluating
     input_fn = tf.estimator.inputs.numpy_input_fn(
-        x={'images': mnist.test.images}, y=mnist.test.labels,
+        x={'images': x_test}, y=y_test,
         batch_size=batch_size, shuffle=False)
     # Use the Estimator 'evaluate' method
     e = model.evaluate(input_fn)
 
-    print("Testing Accuracy:", e['accuracy'])
+    print("Evaluate Accuracy:", e['accuracy'])
 
+    return e['accuracy'], e['loss']
 
 # 使用predictor.from_saved_model()加载导出的模型，用来预测！
-def predict(export_dir):
+def predict(export_dir, x_test):
+    print('Predict mode')
     predict_fn = predictor.from_saved_model(export_dir)
-    predictions = predict_fn( {"images": mnist.test.images} )
+    predictions = predict_fn( {"images": x_test} )
     df = pd.DataFrame(predictions)
-    df['original_labels'] = mnist.test.labels
-    print(df)
+    # df['original_labels'] = y_test
+    print(df.head())
+    # total = len(predictions['output'])
+    # count = 0
+    # for i in range(total):
+        # if predictions['output'][i] == y_test[i]:
+            # count += 1
 
-def main():
+    # accuracy = count/total
+    # print("Predict Accuracy:", accuracy)
+    return "Predict Accuracy:" + str(accuracy)
+
+def train(data_files):
+    (x_train, y_train), (x_test, y_test),labels = datasets.load_cifar10(data_files)
+    x_train = x_train.astype(np.float32).reshape(x_train.shape[0], num_input)
+    y_train = y_train.astype(np.float32)
+
+    x_test = x_test.astype(np.float32).reshape(x_test.shape[0], num_input)
+    y_test = y_test.astype(np.float32)
+
+    print('Train mode')
     # tf.logging.set_verbosity(tf.logging.INFO)
     # Build the Estimator
     model = tf.estimator.Estimator(model_fn)
@@ -146,19 +169,31 @@ def main():
 
     # Train the Model
     model.train(input_fn, steps=num_steps)
+    acc, loss = evaluate(model, x_test, y_test)
 
-    feat_spec = {"images": tf.placeholder("float", name="images", shape=[None, mnist.train.images.shape[1]])}
+    feat_spec = {"images": tf.placeholder("float", name="images", shape=[None, x_train.shape[1]])}
+    # print(feat_spec)
+
+    # Export model
     receiver_fn = tf.estimator.export.build_raw_serving_input_receiver_fn(feat_spec)
-
-    saved_path = 'saved_model'
-    saved_estimator_path = model.export_savedmodel(saved_path, receiver_fn).decode("utf-8")
+    saved_estimator_path = model.export_savedmodel('saved_model', receiver_fn).decode("utf-8")
     print('model is saved to [%s]' % saved_estimator_path)
 
-
+    model_info = {}
+    model_info['acc'] = acc
+    model_info['save_path'] = os.path.join(config.project_root, saved_estimator_path)
+    model_info['loss'] = loss
+    return model_info
 
 if __name__ == "__main__":
-    # main()
-    # saved_model/1535288353
-    print('Do prediction!')
-    predict('saved_model/1535288353')
+    train()
+    if len(sys.argv) <= 1:
+        print('lack of arguments!')
+        exit(-1)
+
+    if sys.argv[1] == 'train':
+        train()
+    elif sys.argv[1] == 'predict':
+        (x_train, y_train), (x_test, y_test) = datasets.load_cifar10()
+        predict(sys.argv[2], x_test)
 

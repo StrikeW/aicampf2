@@ -8,9 +8,12 @@ ARTIFACT_ROOT_ENV_VAR = "MLFLOW_SERVER_ARTIFACT_ROOT"
 STATIC_PREFIX_ENV_VAR = "MLFLOW_STATIC_PREFIX"
 
 REL_STATIC_DIR = "templates"
+
 app = Flask(__name__)
+
 # app.root_path is 'server/'
 STATIC_DIR = os.path.join(app.root_path, REL_STATIC_DIR)
+
 
 for http_path, handler, methods in handlers.get_endpoints():
     app.add_url_rule(http_path, handler.__name__, handler, methods=methods)
@@ -33,13 +36,11 @@ def serve_webfonts(path):
 def serve_static_file(path):
     return send_from_directory(STATIC_DIR, path)
 
-def load_model():
-    print('Root path %s' % app.root_path)
+def _load_model():
     a = []
     fpath = os.path.join(STATIC_DIR, 'model_list.txt')
     with open(fpath) as f:
         for line in f:
-            print(line)
             line = line.strip()
             a.append(line)
     return a
@@ -57,6 +58,10 @@ def show_model_cnn():
 @app.route('/test_cnn')
 def show_test_cnn():
     return render_template('test_cnn.html')
+@app.route('/models')
+def show_models():
+    models = _load_model()
+    return render_template('tmpl.html', my_string="Wheeeee!", my_list=[1,2,3,4], my_models=models)
 
 @app.route('/test', methods=["POST", "GET"])
 def show_test():
