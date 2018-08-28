@@ -35,15 +35,14 @@
 
 
         <div style="padding: 10px;">
-            <form class="layui-form" action="" enctype='multipart/form-data' method="post" id="form1">
+            <form class="layui-form" action="/api/img_predict" enctype='multipart/form-data' method="post" id="form2" target="nm_iframe">
 
                 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
                     <legend>测试数据选择</legend>
                 </fieldset>
 
-
                 <div class="layui-upload" style="margin-left: 30px;">
-                    <button type="button" class="layui-btn" onclick="preview()" id="test1">上传图片</button>
+                    <input type="button" name="testfile" class="layui-btn" id="selectImg" value="选择图片">
                     <div class="layui-upload-list">
                         <img class="layui-upload-img" style="width: 92px; height: 92px; margin: 0 10px 10px 0;"
                              id="demo1">
@@ -55,16 +54,16 @@
                     <legend>测试数据提交</legend>
                 </fieldset>
 
+                <input type="submit" class="layui-btn layui-btn-normal" id="test_btn"
+                       style="margin-left: 30px; " value="提交数据" >
+
 
             </form>
-            <input type="button" class="layui-btn layui-btn-normal" id="train_btn"
-                   style="margin-left: 30px; " value="开始训练" onclick=train()>
-            <span id="train_status" style="margin-left: 20px">未开始</span>
+            <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
+            <br/>
+            <span id="train_status"style="margin-left: 30px; " style="margin-left: 20px">未开始</span>
             <br>
             <br>
-            <input class="layui-btn layui-btn-normal" style="margin-left: 30px" type="button" id="deploy_btn"
-                   value="部署模型"
-                   onclick=deploy()>
         </div>
     </div>
     <div class="layui-footer">
@@ -74,21 +73,17 @@
 </div>
 
 <script type="text/javascript" src='/static-files/jquery-3.3.1.min.js'></script>
+<script type="text/javascript" src='/static-files/jquery.form.js'></script>
 <!-- <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 <script type="text/javascript">
-    function Reset() {
-        window.location.reload();
-    }
-    function predict() {
-        alert("sb")
-        //$.post('/api/predict', {}, function (result, status) {
-            //alert(result);
-        //    $('#test_status').html('预测结果：'+ result);
-      //  });
-    }
-
-
+    $(function(){
+        /** 验证文件是否导入成功  */
+        $("#form2").ajaxForm(function(label){
+            $('#test_status').html('预测结果：'+ label);
+        });
+    });
 </script>
+
 <script src="/static-files/layui.js"></script>
 <script>
     //JavaScript代码区域
@@ -104,7 +99,7 @@
 
           //普通图片上传
           var uploadInst = upload.render({
-            elem: '#test1'
+            elem: '#selectImg'
             ,auto :false
             ,choose: function(obj){
               //预读本地文件示例，不支持ie8
@@ -114,12 +109,6 @@
             }
           });
     });
-    function preview(){
-    $.preview(function(index, file, result){
-                $('#demo1').attr('src', result); //图片链接（base64）
-              });
-    }
-
 </script>
 </body>
 </html>
